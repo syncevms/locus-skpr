@@ -1,0 +1,51 @@
+name: build-locus-vpn-spoofer-unsigned
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Select Xcode
+        run: sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
+
+      - name: Fetch upstream idevice library
+        run: chmod +x scripts/fetch-idevice.sh && ./scripts/fetch-idevice.sh
+
+      - name: Generate Xcode project
+        run: xcodegen generate --spec project.yml
+
+      - name: Build unsigned app
+        run: |
+          xcodebuild \
+            -project LocusVPNSpoofer.xcodeproj \
+            -scheme LocusVPNSpoofer \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_CERTIFICATE_NAME="" \
+            clean build
+
+      - name: Package unsigned IPA
+        run: |
+          rm -rf Payload LocusVPNSpoofer-unsigned.ipa
+          mkdir -p Payload
+          cp -R build/Build/Products/Release-iphoneos/LocusVPNSpoofer.app Payload/
+          zip -qry LocusVPNSpoofer-unsigned.ipa Payload
+          shasum -a 256 LocusVPNSpoofer-unsigned.ipa
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: LocusVPNSpoofer-unsigned-IPA
+          path: LocusVPNSpoofer-unsigned.ipa
