@@ -39,6 +39,9 @@ jobs:
             CODE_SIGNING_CERTIFICATE_NAME="" \
             SWIFT_VERSION=5.0 \
             clean build 2>&1 | tee build.log
+            BUILD_STATUS=${PIPESTATUS[0]}
+            echo "BUILD_STATUS=$BUILD_STATUS"
+            exit $BUILD_STATUS
 
       - name: Print build errors
         if: failure()
