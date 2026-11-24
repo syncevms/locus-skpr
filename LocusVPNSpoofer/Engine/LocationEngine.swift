@@ -29,6 +29,18 @@ struct SpoofTarget {
 }
 
 protocol LocationSpoofing {
+    func prepare(pairingPath: String, tunnelIP: String, tunnelPort: UInt16) throws
+    func setLocation(_ target: SpoofTarget) throws
+    func clearLocation() throws
+    func isReady() -> Bool
+}
+
+final class LocationEngine: LocationSpoofing {
+    private var handle: UnsafeMutableRawPointer?
+    private var pairingPath: String?
+    private var tunnelIP: String?
+    private var tunnelPort: UInt16?
+
     func prepare(pairingPath: String, tunnelIP: String, tunnelPort: UInt16) throws {
         guard FileManager.default.fileExists(atPath: pairingPath) else {
             throw SpoofError.pairingMissing
@@ -59,5 +71,4 @@ protocol LocationSpoofing {
     func isReady() -> Bool {
         handle != nil
     }
-
 }
