@@ -37,7 +37,6 @@ targets:
           - "-ObjC"
           - "-lc++"
           - "-lz"
-          - "-lidevice_ffi"
         LIBRARY_SEARCH_PATHS:
           - "$(SRCROOT)/Vendor/idevice"
         SWIFT_OBJC_BRIDGING_HEADER: LocusVPNSpoofer/Engine/idevice_bridge.h
