@@ -79,6 +79,7 @@ jobs:
           echo "::group::Linker diagnostics"
           grep -nE "Undefined symbols|referenced from|symbol not found|not found for architecture|clang: error|ld: " build.log || true
           echo "::endgroup::"
+          echo "::error::Linker failed; see xcode-build-log artifact for full command"
 
       - name: Locate built app
         id: locate
