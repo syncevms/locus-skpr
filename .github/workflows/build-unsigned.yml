@@ -46,14 +46,26 @@ jobs:
       - name: Print build errors
         if: failure()
         run: |
+          echo "===== BUILD LOG SIZE ====="
+          wc -l build.log || true
+          echo "===== ERRORS ====="
           grep -nE "error:|fatal error|error " build.log || true
+          echo "===== TAIL ====="
           tail -n 160 build.log || true
+          echo "===== UPLOAD LOG ====="
 
       - name: Debug build tree
         if: failure()
         run: |
           find build/Build/Products -maxdepth 6 -type d -print || true
           find build/Build/Products -maxdepth 6 -type f -name "*.app" -print || true
+
+      - name: Upload build log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: xcode-build-log
+          path: build.log
 
       - name: Locate built app
         id: locate
