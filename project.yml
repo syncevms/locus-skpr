@@ -1,0 +1,57 @@
+name: LocusVPNSpoofer
+options:
+  bundleIdPrefix: com.skpr
+  deploymentTarget:
+    iOS: "18.0"
+  xcodeVersion: "16.0"
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    PRODUCT_BUNDLE_IDENTIFIER: com.skpr.locusvpnspoofer
+    DEVELOPMENT_TEAM: "$(DEVELOPMENT_TEAM)"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    IPHONEOS_DEPLOYMENT_TARGET: "18.0"
+    CODE_SIGN_STYLE: Manual
+    CODE_SIGN_IDENTITY: "Apple Development"
+
+targets:
+  LocusVPNSpoofer:
+    type: application
+    platform: iOS
+    sources:
+      - path: LocusVPNSpoofer/App
+      - path: LocusVPNSpoofer/Engine
+      - path: LocusVPNSpoofer/UI
+      - path: LocusVPNSpoofer/Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.skpr.locusvpnspoofer
+        INFOPLIST_FILE: LocusVPNSpoofer/Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: LocusVPNSpoofer/Resources/LocusVPNSpoofer.entitlements
+        OTHER_LDFLAGS:
+          - "-ObjC"
+          - "-lc++"
+          - "-lz"
+        LIBRARY_SEARCH_PATHS:
+          - "$(SRCROOT)/Vendor/idevice"
+        SWIFT_OBJC_BRIDGING_HEADER: LocusVPNSpoofer/Engine/idevice_bridge.h
+    dependencies:
+      - target: LocusVPNSpooferTunnel
+        embed: true
+        sign: true
+
+  LocusVPNSpooferTunnel:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: LocusVPNSpoofer/Tunnel
+      - path: LocusVPNSpoofer/App/AppConfig.swift
+      - path: LocusVPNSpoofer/Resources/TunnelInfo.plist
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.skpr.locusvpnspoofer.tunnel
+        INFOPLIST_FILE: LocusVPNSpoofer/Resources/TunnelInfo.plist
+        CODE_SIGN_ENTITLEMENTS: LocusVPNSpoofer/Resources/Tunnel.entitlements
