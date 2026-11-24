@@ -5,7 +5,7 @@ import NetworkExtension
 final class PacketTunnelProvider: NEPacketTunnelProvider {
     private var monitor: NWPathMonitor?
 
-    override func startTunnel(options: [String: Any]? = nil, completionHandler: @escaping (Error?) -> Void) {
+    func startTunnel(options: [String: Any]? = nil, completionHandler: @escaping (Error?) -> Void) {
         let providerConfig = (protocolConfiguration as? NETunnelProviderProtocol)?.providerConfiguration ?? [:]
         let devIP = providerConfig["developerTunnelIP"] as? String ?? AppConfig.defaultDeveloperTunnelIP
         let devPort = providerConfig["developerTunnelPort"] as? Int ?? Int(AppConfig.defaultDeveloperTunnelPort)
@@ -25,8 +25,13 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
         // If a VPN profile is supplied, default egress is added by the selected adapter.
         // WireGuard is the first supported provider profile format.
         if vpnKind == "wireguard", !vpnConfig.isEmpty {
-            let wg = WireGuardAdapter()
-            try wg.apply(config: vpnConfig, settings: settings)
+            do {
+                let wg = WireGuardAdapter()
+                try wg.apply(config: vpnConfig, settings: settings)
+            } catch {
+                completionHandler(error)
+                return
+            }
         }
 
         setTunnelNetworkSettings(settings) { error in
@@ -40,7 +45,7 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
 
-    override func stopTunnel(with reason: NEProviderStopReason) {
+    func stopTunnel(with reason: NEProviderStopReason) {
         monitor?.cancel()
         monitor = nil
     }
