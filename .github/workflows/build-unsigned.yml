@@ -67,6 +67,18 @@ jobs:
           name: xcode-build-log
           path: build.log
 
+      - name: Publish build errors to job summary
+        if: failure()
+        run: |
+          {
+            echo "## Xcode build failure"
+            echo '```text'
+            grep -nE "error:|fatal error|error " build.log || true
+            echo '--- tail ---'
+            tail -n 120 build.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Locate built app
         id: locate
         run: |
