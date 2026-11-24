@@ -5,7 +5,7 @@ import NetworkExtension
 final class PacketTunnelProvider: NEPacketTunnelProvider {
     private var monitor: NWPathMonitor?
 
-    override func startTunnel(options: [String: Any]? = nil) async throws {
+    override func startTunnel(options: [String: Any]? = nil, completionHandler: @escaping (Error?) -> Void) {
         let providerConfig = (protocolConfiguration as? NETunnelProviderProtocol)?.providerConfiguration ?? [:]
         let devIP = providerConfig["developerTunnelIP"] as? String ?? AppConfig.defaultDeveloperTunnelIP
         let devPort = providerConfig["developerTunnelPort"] as? Int ?? Int(AppConfig.defaultDeveloperTunnelPort)
@@ -29,13 +29,18 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
             try wg.apply(config: vpnConfig, settings: settings)
         }
 
-        try await setTunnelNetworkSettings(settings)
-
-        startLocalPacketLoop()
-        startPathMonitor()
+        setTunnelNetworkSettings(settings) { error in
+            if let error {
+                completionHandler(error)
+                return
+            }
+            self.startLocalPacketLoop()
+            self.startPathMonitor()
+            completionHandler(nil)
+        }
     }
 
-    override func stopTunnel(with reason: NEProviderStopReason) async {
+    override func stopTunnel(with reason: NEProviderStopReason) {
         monitor?.cancel()
         monitor = nil
     }
@@ -66,9 +71,13 @@ struct WireGuardAdapter {
         let parser = WireGuardConfigParser(text: config)
         let parsed = try parser.parse()
 
-        settings.ipv4Settings?.includedRoutes.append(NEIPv4Route(destinationAddress: "0.0.0.0", subnetMask: "0.0.0.0"))
+        if let ipv4 = settings.ipv4Settings {
+            var routes = ipv4.includedRoutes ?? []
+            routes.append(NEIPv4Route(destinationAddress: "0.0.0.0", subnetMask: "0.0.0.0"))
+            ipv4.includedRoutes = routes
+        }
         settings.dnsSettings = NEDNSSettings(servers: parsed.dnsServers.isEmpty ? ["1.1.1.1"] : parsed.dnsServers)
-        settings.mtu = parsed.mtu ?? 1420
+        settings.mtu = NSNumber(value: parsed.mtu ?? 1420)
     }
 }
 
