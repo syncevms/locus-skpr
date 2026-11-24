@@ -5,7 +5,7 @@ import NetworkExtension
 final class PacketTunnelProvider: NEPacketTunnelProvider {
     private var monitor: NWPathMonitor?
 
-    func startTunnel(options: [String: Any]? = nil, completionHandler: @escaping (Error?) -> Void) {
+    override func startTunnel(options: [String: NSObject]? = nil, completionHandler: @escaping (Error?) -> Void) {
         let providerConfig = (protocolConfiguration as? NETunnelProviderProtocol)?.providerConfiguration ?? [:]
         let devIP = providerConfig["developerTunnelIP"] as? String ?? AppConfig.defaultDeveloperTunnelIP
         let devPort = providerConfig["developerTunnelPort"] as? Int ?? Int(AppConfig.defaultDeveloperTunnelPort)
@@ -45,9 +45,10 @@ final class PacketTunnelProvider: NEPacketTunnelProvider {
         }
     }
 
-    func stopTunnel(with reason: NEProviderStopReason) {
+    override func stopTunnel(with reason: NEProviderStopReason, completionHandler: @escaping () -> Void) {
         monitor?.cancel()
         monitor = nil
+        completionHandler()
     }
 
     private func startLocalPacketLoop() {
