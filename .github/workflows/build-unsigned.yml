@@ -74,7 +74,7 @@ jobs:
             echo "::error::$line"
           done < <(grep -nE "error:|fatal error|error |undefined symbol|ld: |Ld " build.log || true)
           echo "::group::Xcode build tail"
-          tail -n 220 build.log || true
+          tail -n 500 build.log || true
           echo "::endgroup::"
 
       - name: Locate built app
