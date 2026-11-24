@@ -49,7 +49,7 @@ jobs:
           echo "===== BUILD LOG SIZE ====="
           wc -l build.log || true
           echo "===== ERRORS ====="
-          grep -nE "error:|fatal error|error " build.log || true
+          grep -nE "error:|fatal error|error |undefined symbol|ld: |Ld " build.log || true
           echo "===== TAIL ====="
           tail -n 160 build.log || true
           echo "===== UPLOAD LOG ====="
@@ -72,7 +72,7 @@ jobs:
         run: |
           while IFS= read -r line; do
             echo "::error::$line"
-          done < <(grep -nE "error:|fatal error|error " build.log || true)
+          done < <(grep -nE "error:|fatal error|error |undefined symbol|ld: |Ld " build.log || true)
           echo "::group::Xcode build tail"
           tail -n 120 build.log || true
           echo "::endgroup::"
