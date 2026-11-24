@@ -1,5 +1,6 @@
 import SwiftUI
 import UniformTypeIdentifiers
+import NetworkExtension
 
 struct ContentView: View {
     @StateObject private var tunnel = TunnelManager()
@@ -22,7 +23,7 @@ struct ContentView: View {
                     Button("Stop Tunnel") {
                         Task { await tunnel.stop(); message = "Tunnel stopped" }
                     }
-                    Text("Status: \(tunnel.status.description)")
+                    Text("Status: \(tunnel.status.label)")
                 }
 
                 Section("Pairing") {
@@ -117,8 +118,8 @@ struct ContentView: View {
     }
 }
 
-extension NEVPNStatus: CustomStringConvertible {
-    public var description: String {
+extension NEVPNStatus {
+    var label: String {
         switch self {
         case .connected: return "connected"
         case .connecting: return "connecting"
