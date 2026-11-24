@@ -56,14 +56,12 @@ final class LocationEngine: LocationSpoofing {
         self.tunnelIP = tunnelIP
         self.tunnelPort = tunnelPort
 
-        let ok = withVaList([]) { _ in
-            lvs_engine_prepare(
-                pairingPath,
-                tunnelIP,
-                Int32(tunnelPort),
-                &handle
-            )
-        }
+        let ok = lvs_engine_prepare(
+            pairingPath,
+            tunnelIP,
+            Int32(tunnelPort),
+            &handle
+        )
 
         if !ok || handle == nil {
             throw SpoofError.engineFailure("prepare returned false")

@@ -117,7 +117,7 @@ struct ContentView: View {
     }
 }
 
-extension NEVPNStatus: @retroactive CustomStringConvertible {
+extension NEVPNStatus: CustomStringConvertible {
     public var description: String {
         switch self {
         case .connected: return "connected"

@@ -34,7 +34,14 @@ jobs:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_CERTIFICATE_NAME="" \
+            SWIFT_VERSION=5.0 \
             clean build
+
+      - name: Debug build tree
+        if: failure()
+        run: |
+          find build/Build/Products -maxdepth 4 -type d -print || true
+          find build/Build/Products -maxdepth 4 -type f -name "*.app" -print || true
 
       - name: Package unsigned IPA
         run: |
