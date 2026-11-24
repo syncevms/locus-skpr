@@ -2,6 +2,9 @@ name: build-locus-vpn-spoofer-unsigned
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
 
 jobs:
   build:
