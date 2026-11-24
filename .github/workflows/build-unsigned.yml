@@ -43,12 +43,38 @@ jobs:
           find build/Build/Products -maxdepth 4 -type d -print || true
           find build/Build/Products -maxdepth 4 -type f -name "*.app" -print || true
 
+      - name: Locate built app
+        id: locate
+        run: |
+          APP_PATH="$(find build/Build/Products -type d -name 'LocusVPNSpoofer.app' -print -quit)"
+          if [ -z "$APP_PATH" ]; then
+            echo "::error::LocusVPNSpoofer.app was not found"
+            find build/Build/Products -maxdepth 5 -type d -print || true
+            exit 1
+          fi
+          if [ ! -f "$APP_PATH/LocusVPNSpoofer" ]; then
+            echo "::error::App binary missing at $APP_PATH/LocusVPNSpoofer"
+            find "$APP_PATH" -maxdepth 2 -type f -print || true
+            exit 1
+          fi
+          echo "app_path=$APP_PATH" >> "$GITHUB_OUTPUT"
+          echo "Found app: $APP_PATH"
+          ls -lh "$APP_PATH/LocusVPNSpoofer"
+
       - name: Package unsigned IPA
         run: |
+          APP_PATH="${{ steps.locate.outputs.app_path }}"
           rm -rf Payload LocusVPNSpoofer-unsigned.ipa
           mkdir -p Payload
-          cp -R build/Build/Products/Release-iphoneos/LocusVPNSpoofer.app Payload/
+          cp -R "$APP_PATH" Payload/
           zip -qry LocusVPNSpoofer-unsigned.ipa Payload
+          test -s LocusVPNSpoofer-unsigned.ipa
+          IPA_SIZE="$(stat -f%z LocusVPNSpoofer-unsigned.ipa)"
+          if [ "$IPA_SIZE" -lt 100000 ]; then
+            echo "::error::IPA too small: $IPA_SIZE bytes"
+            exit 1
+          fi
+          echo "IPA size: $IPA_SIZE bytes"
           shasum -a 256 LocusVPNSpoofer-unsigned.ipa
 
       - name: Upload unsigned IPA
