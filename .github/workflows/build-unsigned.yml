@@ -83,6 +83,12 @@ jobs:
           echo "LINKER_DIAGNOSTICS<<EOF" >> "$GITHUB_OUTPUT"
           grep -E "Undefined symbols|referenced from|symbol not found|not found for architecture|clang: error|ld: " build.log >> "$GITHUB_OUTPUT" || true
           echo "EOF" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Linker diagnostics"
+            echo '```text'
+            grep -E "Undefined symbols|referenced from|symbol not found|not found for architecture|clang: error|ld: " build.log || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Locate built app
         id: locate
