@@ -76,6 +76,9 @@ jobs:
           echo "::group::Xcode build tail"
           cat build.log || true
           echo "::endgroup::"
+          echo "::group::Linker diagnostics"
+          grep -nE "Undefined symbols|referenced from|symbol not found|not found for architecture|clang: error|ld: " build.log || true
+          echo "::endgroup::"
 
       - name: Locate built app
         id: locate
